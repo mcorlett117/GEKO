@@ -2,7 +2,7 @@
 
 ### in development
 
-An automated engine for creating a threat-informed detection lifecycle by integrating **G**it, **E**lasticsearch, **K**ibana, and **O**penCTI.
+An automated engine for creating a threat-informed detection lifecycle by integrating **G**it, **E**lasticsearch, **K**ibana, and **O**penCTI (GEKO).
 
 ![Project Status](https://img.shields.io/badge/status-in%20development-blue)
 ![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)
@@ -19,11 +19,11 @@ The core goal is to provide a clear, data-driven view of your detection coverage
 
 Follow these phases to get a local copy of the entire stack up and running for development.
 
-Prerequisites
-[Git]()
-[Docker Desktop for Windows]()
+#### Prerequisites:
+**OpenCTI:** You will need a up and running OpenCTI instance to query `Intrusion Set` and `Attack Patterns.`
+**ElasticSearch / Kibana:** You will need this to map you current `rules` for a coverage report. 
 
-#### GitHub & Project Setup
+## GitHub & Project Setup
 1. Fork the Sigma Repository on GitHub.
 2. Create a new private GEKO repository on GitHub.
 3. Clone your GEKO repository to your local machine.
