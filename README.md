@@ -1,11 +1,11 @@
-# GEKO: Threat-Informed Detection Engine 🦎
+# GEKO: Threat-Informed Detection Engine :lizard:
 
-### in development
+![Project Status](https://img.shields.io/badge/Status-In_development-red)
 
-An automated engine for creating a threat-informed detection lifecycle by integrating **G**it, **E**lasticsearch, **K**ibana, and **O**penCTI (GEKO).
+An automated engine for creating a threat-informed detection lifecycle by integrating **G**itLab, **E**lasticsearch, **K**ibana, and **O**penCTI.
 
-![Project Status](https://img.shields.io/badge/status-in%20development-blue)
-![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3\.10+-blue) ![OpenCTI](https://img.shields.io/badge/OpenCTI-6\.7\.9+-blue) ![ElasticSearch](https://img.shields.io/badge/ElasticSearch-8\.18\.3+-blue) ![Kibana](https://img.shields.io/badge/Kibana-8\.18\.3+-blue) ![GitLab](https://img.shields.io/badge/GitLab-18\.3+-blue)
+
 
 ---
 
