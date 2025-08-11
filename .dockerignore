@@ -1,0 +1,18 @@
+# Git folder
+.git
+.gitignore
+
+# Python virtual environment
+venv
+.venv
+
+# Python cache
+__pycache__
+
+# Docker files
+.dockerignore
+docker-compose.yml
+
+# README and local config
+README.md
+.env
