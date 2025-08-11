@@ -2,9 +2,11 @@
 .env
 checklist.md
 Threat-Report/
+
 # Ignore Python bytecode files
 __pycache__/
 *.py[cod]
+venv/
 
 # Ignore the .vscode directory
 .vscode/
