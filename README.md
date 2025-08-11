@@ -1,6 +1,6 @@
 # GEKO: Threat-Informed Detection Engine 🦎
 
-## This is not ready for use, and currently under development.
+### in development
 
 An automated engine for creating a threat-informed detection lifecycle by integrating **G**it, **E**lasticsearch, **K**ibana, and **O**penCTI.
 
