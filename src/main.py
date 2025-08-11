@@ -29,22 +29,7 @@ ELASTIC_HEADERS = {
 }  
 
 
-TOP_ACTORS = [
-    "APT28",
-    "XYZABC",
-    "Turla",
-    "APT29",
-    "APT32",
-    "APT33",
-    "UNC5435",
-    "UNC5687",
-    "HOUND SPIDER",
-    "APT38",
-    "APT39",
-    "APT40",
-    "APT41",
-    "APT42",
-]
+TOP_ACTORS = os.getenv("TOP_ACTORS").split(", ")    
 
 TABLE_LENGTH = 10 # Number of rows to show in the table
 
@@ -107,6 +92,7 @@ def main():
     
     all_actors = []
     missing_actors = []
+    log_info(f"Processing TOP {TABLE_LENGTH} actors: {TOP_ACTORS}")
     for actor in TOP_ACTORS:
         actor_details = get_actor_details(OPENCTI_URL, OPENCTI_HEADERS, actor)
         if actor_details:
