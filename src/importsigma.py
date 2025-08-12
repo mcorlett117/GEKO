@@ -1,7 +1,5 @@
 import os
 import re
-from pathlib import Path
-
 import requests
 import yaml
 from log import log_info, log_error, log_debug
@@ -22,7 +20,7 @@ OPENCTI_HEADERS = {
     "Content-Type": "application/json"
 }
 
-sigma_folder = f"./sigma/rules/windows/"
+sigma_folder = "./sigma/rules/windows/"
 
 def get_sigma_rules(sigma_folder):
     for root, dirs, files in os.walk(sigma_folder):

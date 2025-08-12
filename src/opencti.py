@@ -1,5 +1,4 @@
 import requests
-from datetime import datetime
 from log import log_info, log_error, log_debug
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -221,7 +220,6 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
         log_info(f"Failed to fetch COAs for technique {technique_id}")
         return None
     data = response.json()
-    total = data.get("data", {}).get("stixCoreRelationships", {}).get("pageInfo", {}).get("globalCount", 0)
     if "data" not in data or "stixCoreRelationships" not in data["data"]:
         log_info(f"No coas found for actor {technique_id}.")
         return [], 0  # Return empty list and 0 instead of None
@@ -281,7 +279,6 @@ def get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules):
         for edge in edges:
             node = edge.get("node", {})
             to_node = node.get("to", {})
-            technique_id = to_node.get("id")
             technique_name = to_node.get("name", 'Unknown Technique')
             tid = to_node.get("x_mitre_id", 'Unknown TID')
             if tid and technique_name:
