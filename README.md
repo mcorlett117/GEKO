@@ -11,7 +11,7 @@ An automated engine for creating a threat-informed detection lifecycle by integr
 
 ## About The Project
 
-GEKO is designed to bridge the gap between threat intelligence and security operations. It automates the process of mapping your active detection rules in Elasticsearch against the known tactics, techniques, and procedures (TTPs) of threat actors cataloged in OpenCTI.
+GEKO is designed to bridge the gap between threat intelligence and security operations. It automates the process of mapping your active detection rules in Elastic against the known Tactics, Techniques, and Procedures (TTPs) of threat actors (Intrusion Sets) cataloged in OpenCTI.
 
 The core goal is to provide a clear, data-driven view of your detection coverage, identify critical gaps, and prioritize detection engineering efforts based on relevant threats.
 
