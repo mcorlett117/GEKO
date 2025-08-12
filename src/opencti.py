@@ -458,3 +458,24 @@ def remove_disabled_coas(OPENCTI_URL, OPENCTI_HEADERS, enabled_rules):
             log_info(f"Removing disabled COA: {coa_name}")
             delete_coa(OPENCTI_URL, OPENCTI_HEADERS, coa_id)
 
+def create_sigma_relationship(OPENCTI_URL, OPENCTI_HEADERS, rule_id, tid, title):
+    """Create a relationship between a Sigma rule and a technique."""
+    query = f"""
+        mutation LinkSigmaTechnique {{
+            stixCoreRelationshipAdd (input: {{
+                fromId: "{rule_id}",
+                toId: "{tid}",
+                relationship_type: "indicates",
+                }}) {{
+                    id
+                }}
+            }}
+    """
+    response = requests.post(OPENCTI_URL, headers=OPENCTI_HEADERS, json={"query": query}, verify=False)
+    if response.status_code != 200:
+        log_error(f"Failed to create Sigma relationship for {title}: {response.text}")
+        return
+    data = response.json()
+    if "data" not in data or "stixCoreRelationshipAdd" not in data["data"]:
+        log_error(f"Failed to create Sigma relationship for {title}: {data}")
+        return
