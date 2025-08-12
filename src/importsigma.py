@@ -1,18 +1,17 @@
-from ast import pattern
-from datetime import datetime
 import os
-import yaml
-import requests
-import urllib3
 import re
+from pathlib import Path
+
+import requests
+import yaml
 from log import log_info, log_error, log_debug
 from dotenv import load_dotenv
 from opencti import get_techniques_ids, create_sigma_relationship
+import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==============
 # Config
-
 # ==============
 load_dotenv()
 OPENCTI_URL = os.getenv("OPENCTI_URL")
@@ -23,8 +22,7 @@ OPENCTI_HEADERS = {
     "Content-Type": "application/json"
 }
 
-sigma_folder = f"./sigma/rules/windows/file"
-
+sigma_folder = f"./sigma/rules/windows/"
 
 def get_sigma_rules(sigma_folder):
     for root, dirs, files in os.walk(sigma_folder):
@@ -36,16 +34,16 @@ def get_sigma_rules(sigma_folder):
                         log_error(f"Failed to parse Sigma rule: {filename}")
                         continue
                     title = rule.get('title', 'Unknown Title')
+                    safe_title = f"\"\"[SIGMA] {title}\"\""
                     description = rule.get('description', 'No Description')
                     safe_description = f"\"\"{description}\"\""
                     rule_yaml = yaml.dump(rule)
-                    log_debug(f"Processing rule: {title}")
-                    # Escape triple quotes and backslashes in rule_yaml
                     safe_rule_yaml = f"\"\"{rule_yaml}\"\""
+                    log_debug(f"Processing rule: {title}")
                     mutation = f"""
                     mutation {{
                         indicatorAdd(input: {{
-                            name: "[SIGMA] - {title}"
+                            name: "{safe_title}"
                             description: "{safe_description}"
                             pattern_type: "sigma"
                             pattern: "{safe_rule_yaml}"
