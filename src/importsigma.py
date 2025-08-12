@@ -20,7 +20,7 @@ OPENCTI_HEADERS = {
     "Content-Type": "application/json"
 }
 
-sigma_folder = "./sigma/rules/windows/"
+sigma_folder = "./sigma/rules/cloud/"
 
 def get_sigma_rules(sigma_folder):
     for root, dirs, files in os.walk(sigma_folder):

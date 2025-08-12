@@ -242,6 +242,7 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
 def get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules):
     results = []
     for rule in sigma_rules:
+        log_debug(f"Processing Sigma rule: {rule.get('name', 'Unknown Rule')}")
         sigma_name = rule.get('name', 'Unknown Rule')
         sigma_id = rule.get('id', 'Unknown ID')
         query = f"""
