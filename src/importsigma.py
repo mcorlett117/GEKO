@@ -33,6 +33,7 @@ def get_sigma_rules(sigma_folder):
                     rule = yaml.safe_load(f)
                     title = rule.get('title', 'Unknown Title')
                     description = rule.get('description', 'No Description')
+                    safe_description = f"\"\"{description}\"\""
                     rule_yaml = yaml.dump(rule)
                     log_debug(f"Processing rule: {title}")
                     # Escape triple quotes and backslashes in rule_yaml
@@ -40,8 +41,8 @@ def get_sigma_rules(sigma_folder):
                     mutation = f"""
                     mutation {{
                         indicatorAdd(input: {{
-                            name: "[SIGMA] {title}"
-                            description: "{description}"
+                            name: "[SIGMA] - {title}"
+                            description: "{safe_description}"
                             pattern_type: "sigma"
                             pattern: "{safe_rule_yaml}"
                         }}) {{
@@ -55,13 +56,10 @@ def get_sigma_rules(sigma_folder):
                     response = requests.post(OPENCTI_URL, headers=OPENCTI_HEADERS, json={"query": mutation}, verify=False)
                     log_debug(f"Response: {response.text}")
                     if response.status_code == 200:
-                        log_info(f"Successfully imported Sigma rule: {rule.get('title')}")
+                        log_info(f"Successfully imported Sigma rule: {title}")
                     else:
-                        log_error(f"Failed to import Sigma rule: {rule.get('title')} - {response.text}")
+                        log_error(f"Failed to import Sigma rule: {title} - {response.text}")
                     
-     
-
-
 def main():
     log_info(f"Starting Sigma import of {sigma_folder}")
     get_sigma_rules(sigma_folder)
