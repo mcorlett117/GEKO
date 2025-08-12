@@ -7,7 +7,7 @@ Threat-Report/
 __pycache__/
 *.py[cod]
 venv/
-
+sigma/
 # Ignore the .vscode directory
 .vscode/
 
