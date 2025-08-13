@@ -456,7 +456,7 @@ def remove_disabled_coas(OPENCTI_URL, OPENCTI_HEADERS, enabled_rules):
     enabled_rule_names = {f"[Rule] {rule['name']}" for rule in enabled_rules}
     for coa_name, coa_id in coa_name_to_id.items():
         if coa_name not in enabled_rule_names:
-            log_info(f"Removing disabled COA: {coa_name}")
+            log_debug(f"Removing disabled COA: {coa_name}")
             delete_coa(OPENCTI_URL, OPENCTI_HEADERS, coa_id)
 
 def create_sigma_relationship(OPENCTI_URL, OPENCTI_HEADERS, rule_id, tid, title):
