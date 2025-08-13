@@ -31,7 +31,7 @@ ELASTIC_HEADERS = {
 
 TOP_ACTORS = os.getenv("TOP_ACTORS").split(", ")    
 
-TABLE_LENGTH = 15 # Number of rows to show in the table
+TABLE_LENGTH = 10 # Number of rows to show in the table
 
 
 # ==============
@@ -43,6 +43,15 @@ def ensure_threat_reports_folder():
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
+
+def get_unique_actor_techniques(all_actors):
+    unique_techniques = []
+    for actor in all_actors:
+        techniques = get_actor_techniques(OPENCTI_URL, OPENCTI_HEADERS, actor[0])
+        for technique in techniques:
+            if technique.get('x_mitre_id') not in [t.get('x_mitre_id') for t in unique_techniques]:
+                unique_techniques.append(technique)
+    return unique_techniques
 
 def extract_elastic_techniques(elastic_rules):
     results = []
@@ -87,18 +96,16 @@ def main():
     log_info("Updating Elastic rules in OpenCTI.")
     update_rules_in_opencti(OPENCTI_URL, OPENCTI_HEADERS, enabled_rules)
     log_info("Updated Elastic rules in OpenCTI.")
-    log_info
+  
     remove_disabled_coas(OPENCTI_URL, OPENCTI_HEADERS, enabled_rules)
     log_info("Removed disabled CoAs from OpenCTI.")
     log_info("Fetching techniques from elastic rules.")
     elastic_techniques = extract_elastic_techniques(enabled_rules)
-    log_info(f"Found {len(elastic_techniques)} techniques in Elastic rules.")
     log_info("Fetching Sigma rules from OpenCTI.")
     sigma_rules = get_sigma_rules(OPENCTI_URL, OPENCTI_HEADERS)
     log_info(f"Found {len(sigma_rules)} Sigma rules.")
     log_info("Fetching techniques from Sigma rules.")
     sigma_techniques = get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules)
-    log_info(f"Found {len(sigma_techniques)} techniques in Sigma rules.")
 
 
     log_info("Fetching actor details from OpenCTI.")
@@ -114,12 +121,7 @@ def main():
     log_info(f"Found {len(all_actors)} actors, missing details for {len(missing_actors)} actors: {', '.join(missing_actors)}.")
 
     log_info("Fetching techniques for all actors.")
-    unique_techniques = []
-    for actor in all_actors:
-        techniques = get_actor_techniques(OPENCTI_URL, OPENCTI_HEADERS, actor[0])
-        for technique in techniques:
-            if technique.get('x_mitre_id') not in [t.get('x_mitre_id') for t in unique_techniques]:
-                unique_techniques.append(technique)
+    unique_techniques = get_unique_actor_techniques(all_actors)
     log_info(f"Found {len(unique_techniques)} unique techniques across all actors.")
 
 # ==============
@@ -155,12 +157,12 @@ There is a total of **{len(all_actors)}** actors, **{len(sigma_rules)}** Sigma r
 
 # :scroll: Landscape Overview
 | Intrusion Sets | Sigma Rules | Elastic Rules | Attack Patterns |
-|----------------|--------------|------|------------------|
+|----------------|-------------|----------------|----------------|
 {overview_table}
 
 ## :fire: TOP {TABLE_LENGTH} ACTORS
 | Name | Aliases | # of Techniques |
-|------|---------|----------------| 
+|------|---------|-----------------| 
 {actor_table}
 
 ## :triangular_flag_on_post: Coverage by MITRE Tactic
@@ -171,7 +173,7 @@ There is a total of **{len(all_actors)}** actors, **{len(sigma_rules)}** Sigma r
 
 ## :top: Top {TABLE_LENGTH} Targetted Techniques by Actors
 | Technique | Used by Actors | Count |
-|--------------|----------------|-----------------|
+|-----------|----------------|-------|
 {technique_table}
 
 ## :mag: Detection Coverage
@@ -179,17 +181,17 @@ This section provides an overview of the coverage of techniques by Elastic and S
 
 ### :dart: Top {TABLE_LENGTH} Techniques with Elastic Rules and Sigma Rules
 |Technique | Elastic rules | Sigma Rules | Covered |
-|-------------|------------------|------------------|------------------------|
+|----------|---------------|-------------|---------|
 {coverage_table}
 
 ### :warning: Top {TABLE_LENGTH} Techniques with lowest Elastic Rules and/or Sigma Rules  
 |Technique | Elastic Rules | Sigma Rules | Covered |
-|-------------|------------------|------------------|------------------------|
+|----------|----------------|------------|---------|
 {coverage_table_uncovered}
 
 ### :rocket: {TABLE_LENGTH} techniques with Sigma Rules but no Elastic Rules
-| Technique | Sigma Rules | Elastic Rules |
-|-------------|------------------|------------------|
+| Technique | Sigma Rules | Elastic Rules | Sigma Rule suggestion |
+|-----------|-------------|---------------|----------------------|
 {sigma_table}
 
 ### :chart: Coverage Summary

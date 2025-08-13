@@ -1,6 +1,18 @@
-from opencti import get_actor_techniques
-from datetime import datetime
-from log import log_info, log_error, log_debug
+from opencti import get_actor_techniques, get_techniques_ids, get_sigma_rules_for_technique
+import os
+from log import log_debug
+from dotenv import load_dotenv
+
+# ==============
+# Config
+# ==============
+load_dotenv()
+OPENCTI_URL = os.getenv("OPENCTI_URL")
+OPENCTI_TOKEN = os.getenv("OPENCTI_TOKEN")
+OPENCTI_HEADERS = {
+    "Authorization": f"Bearer {OPENCTI_TOKEN}",
+    "Content-Type": "application/json"
+}
 
 
 # ==============
@@ -76,7 +88,8 @@ def create_coverage_table(unique_techniques, elastic_techniques, sigma_technique
         covered = "NO" if elastic_count == 0 else "YES"
 
         coverage_rows.append({
-            "technique": f"{tid} {technique_name}",
+            "technique_id": tid,
+            "technique_name": technique_name,
             "elastic": elastic_count,
             "sigma": sigma_count,
             "covered": covered 
@@ -86,21 +99,23 @@ def create_coverage_table(unique_techniques, elastic_techniques, sigma_technique
     sorted_covered = sorted(coverage_rows, key=lambda x: (-x["elastic"], -x["sigma"]))
     table_cover = []
     for row in sorted_covered[:TABLE_LENGTH]:
-        table_cover.append(f"| {row['technique']} | {row['elastic']} | {row['sigma']} | {row['covered']} |")
+        table_cover.append(f"| {row['technique_id']} {row['technique_name']} | {row['elastic']} | {row['sigma']} | {row['covered']} |")
     cover_table = '\n'.join(table_cover)
 
     sorted_uncovered = sorted(coverage_rows, key=lambda x: (x["elastic"], x["sigma"]))
     table_uncovered = []
     for row in sorted_uncovered[:TABLE_LENGTH]:
-        table_uncovered.append(f"| {row['technique']} | {row['elastic']} | {row['sigma']} | {row['covered']} |")
+        table_uncovered.append(f"| {row['technique_id']} {row['technique_name']} | {row['elastic']} | {row['sigma']} | {row['covered']} |")
     uncovered_table = '\n'.join(table_uncovered)
 
     uncovered_rows = [row for row in coverage_rows if row["covered"] == "NO"]
     sorted_uncovered_rows = sorted(uncovered_rows, key=lambda x: -x["sigma"])
     table_sigma = []
     for row in sorted_uncovered_rows[:TABLE_LENGTH]:
-        table_sigma.append(f"| {row['technique']} | {row['sigma']} | {row['elastic']} |")
-    sigma_table = '\n'.join(table_sigma) 
+        tech_id = get_techniques_ids(OPENCTI_URL, OPENCTI_HEADERS, row['technique_id'])
+        sigma_rules, sigmatotal = get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, tech_id, row['technique_name'])
+        table_sigma.append(f"| {row['technique_id']} {row['technique_name']} | {row['sigma']} | {row['elastic']} | \"{', '.join(sigma_rules[1])}\" |")
+    sigma_table = '\n'.join(table_sigma)
 
     return cover_table, uncovered_table, sigma_table
 

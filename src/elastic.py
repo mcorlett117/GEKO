@@ -1,5 +1,5 @@
 import requests
-from log import log_info, log_error, log_debug
+from log import log_error
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

@@ -233,8 +233,8 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
         indicator_id = from_node.get("id")
         indicator_name = from_node.get("name")
         pattern_type = from_node.get("pattern_type")
-        if pattern_type != "yara":
-            log_info(f"Skipping non-YARA pattern type: {pattern_type}")
+        if pattern_type != "sigma":
+            log_info(f"Skipping non-Sigma pattern type: {pattern_type}")
             continue
         if indicator_id and indicator_name:
             indicators.append((indicator_id, indicator_name))
@@ -480,3 +480,4 @@ def create_sigma_relationship(OPENCTI_URL, OPENCTI_HEADERS, rule_id, tid, title)
     if "data" not in data or "stixCoreRelationshipAdd" not in data["data"]:
         log_error(f"Failed to create Sigma relationship for {title}: {data}")
         return
+    
