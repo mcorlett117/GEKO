@@ -2,24 +2,6 @@
 
 This project, GEKO, uses the following third-party libraries and resources.
 
-## Python Dependencies
-
-### python-dotenv
-- **License:** BSD-3-Clause License
-- **Source:** https://github.com/theskumar/python-dotenv
-- **Required Notice:** Copyright (c) 2013-2023 Saurabh Kumar. All rights reserved.
-
-### requests
-- **License:** Apache License 2.0
-- **Source:** https://pypi.org/project/requests/
-- **Required Notice:**
-    Requests is licensed under the Apache Software License 2.0. A copy of the license is available at https://pypi.org/project/requests/
-
-### pyyaml
-- **License:** MIT License
-- **Source:** https://github.com/yaml/pyyaml
-- **Required Notice:** Copyright (c) 2017 Ingy döt Net. All rights reserved. A copy of the license is available in the source repository.
-
 ## Docker Images and Platform Services
 
 ### OpenCTI Community Edition
