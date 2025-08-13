@@ -114,7 +114,10 @@ def create_coverage_table(unique_techniques, elastic_techniques, sigma_technique
     for row in sorted_uncovered_rows[:TABLE_LENGTH]:
         tech_id = get_techniques_ids(OPENCTI_URL, OPENCTI_HEADERS, row['technique_id'])
         sigma_rules, sigmatotal = get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, tech_id)
-        table_sigma.append(f"| {row['technique_id']} {row['technique_name']} | {row['sigma']} | {row['elastic']} | \"{', '.join(sigma_rules[1])}\" |")
+        fivesigma = []
+        for indicator_id, indicator_name in sigma_rules[:5]:
+            fivesigma.append((indicator_id, indicator_name))
+        table_sigma.append(f"| {row['technique_id']} {row['technique_name']} | {row['sigma']} | {row['elastic']} | {fivesigma} |")
     sigma_table = '\n'.join(table_sigma)
 
     return cover_table, uncovered_table, sigma_table
