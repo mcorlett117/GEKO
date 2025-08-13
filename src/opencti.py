@@ -1,4 +1,5 @@
 import requests
+import json
 from log import log_info, log_error, log_debug
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -19,6 +20,7 @@ def get_total_COAs(OPENCTI_URL, OPENCTI_HEADERS):
     response = requests.post(OPENCTI_URL, headers=OPENCTI_HEADERS, json={"query": query}, verify=False)
     if response.status_code != 200:
         log_error(f"Failed to fetch COAs count: {response.text}")
+        log_debug(f"Request payload: {json.dumps({'query': query}, indent=2)}")
         return None
     data = response.json()
     COATotal = data.get("data", {}).get("coursesOfAction", {}).get("pageInfo", {}).get("globalCount", 0)

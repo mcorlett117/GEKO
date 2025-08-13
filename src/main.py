@@ -3,7 +3,7 @@ import os
 from elastic import get_elastic_rules
 from opencti import get_actor_details, get_actor_techniques, get_sigma_rules, get_sigma_techniques, update_rules_in_opencti, remove_disabled_coas
 from tables import create_actor_table, create_technique_table, create_coverage_table, create_metric_table
-from log import log_info, log_error, log_debug
+from log import log_info
 from dotenv import load_dotenv
 
 # ==============
@@ -31,7 +31,7 @@ ELASTIC_HEADERS = {
 
 TOP_ACTORS = os.getenv("TOP_ACTORS").split(", ")    
 
-TABLE_LENGTH = 10 # Number of rows to show in the table
+TABLE_LENGTH = 15 # Number of rows to show in the table
 
 
 # ==============
