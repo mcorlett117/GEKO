@@ -83,13 +83,25 @@ def extract_elastic_techniques(elastic_rules):
 def main():
     ensure_threat_reports_folder()
     elastic_rules, enabled_rules = get_elastic_rules(ELASTIC_API_URL, ELASTIC_HEADERS)
-    elastic_techniques = extract_elastic_techniques(enabled_rules)
-    sigma_rules = get_sigma_rules(OPENCTI_URL, OPENCTI_HEADERS)
-    sigma_techniques = get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules)
-    
+    log_info(f"Found {len(elastic_rules)} Elastic rules, {len(enabled_rules)} enabled rules.")
+    log_info("Updating Elastic rules in OpenCTI.")
     update_rules_in_opencti(OPENCTI_URL, OPENCTI_HEADERS, enabled_rules)
+    log_info("Updated Elastic rules in OpenCTI.")
+    log_info
     remove_disabled_coas(OPENCTI_URL, OPENCTI_HEADERS, enabled_rules)
-    
+    log_info("Removed disabled CoAs from OpenCTI.")
+    log_info("Fetching techniques from elastic rules.")
+    elastic_techniques = extract_elastic_techniques(enabled_rules)
+    log_info(f"Found {len(elastic_techniques)} techniques in Elastic rules.")
+    log_info("Fetching Sigma rules from OpenCTI.")
+    sigma_rules = get_sigma_rules(OPENCTI_URL, OPENCTI_HEADERS)
+    log_info(f"Found {len(sigma_rules)} Sigma rules.")
+    log_info("Fetching techniques from Sigma rules.")
+    sigma_techniques = get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules)
+    log_info(f"Found {len(sigma_techniques)} techniques in Sigma rules.")
+
+
+    log_info("Fetching actor details from OpenCTI.")
     all_actors = []
     missing_actors = []
     log_info(f"Processing TOP {TABLE_LENGTH} actors: {TOP_ACTORS}")
@@ -99,19 +111,21 @@ def main():
             all_actors.extend(actor_details)
         else:
             missing_actors.append(actor)
+    log_info(f"Found {len(all_actors)} actors, missing details for {len(missing_actors)} actors: {', '.join(missing_actors)}.")
 
+    log_info("Fetching techniques for all actors.")
     unique_techniques = []
     for actor in all_actors:
         techniques = get_actor_techniques(OPENCTI_URL, OPENCTI_HEADERS, actor[0])
         for technique in techniques:
             if technique.get('x_mitre_id') not in [t.get('x_mitre_id') for t in unique_techniques]:
                 unique_techniques.append(technique)
-
+    log_info(f"Found {len(unique_techniques)} unique techniques across all actors.")
 
 # ==============
 # Generate tables
 # ==============
-
+    log_info("Generating tables for the report.")
     overview_table = f" | {len(all_actors)}| {len(sigma_rules)} | {len(enabled_rules)}  | {len(unique_techniques)} |"
 
     actor_table = create_actor_table(OPENCTI_URL, OPENCTI_HEADERS, all_actors, TABLE_LENGTH)
@@ -123,7 +137,7 @@ def main():
     coverage_table, coverage_table_uncovered, sigma_table = create_coverage_table(unique_techniques, elastic_techniques, sigma_techniques, TABLE_LENGTH)
 
     metric_table = create_metric_table(elastic_techniques, sigma_techniques, unique_techniques)
-
+    log_info("Generated all tables for the report.")
 # ==============
 # Generate report
 # ==============
@@ -185,10 +199,11 @@ This section provides an overview of the coverage of techniques by Elastic and S
 """
 
     #print(report_data)
-
+    log_info("Saving report to file.")
     report_title = datetime.now().strftime("%Y-%m-%d-Threat-Report.md")
     with open(f"./Threat-Report/{report_title}", "w") as f:
         f.write(report_data)
+        log_info(f"Report saved to ./Threat-Report/{report_title}") 
 
 if __name__ == "__main__":
     main()

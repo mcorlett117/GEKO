@@ -242,7 +242,7 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
 def get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules):
     results = []
     for rule in sigma_rules:
-        log_debug(f"Processing Sigma rule: {rule.get('name', 'Unknown Rule')}")
+        log_info(f"Processing Sigma rule: {rule.get('name', 'Unknown Rule')}")
         sigma_name = rule.get('name', 'Unknown Rule')
         sigma_id = rule.get('id', 'Unknown ID')
         query = f"""
@@ -274,7 +274,7 @@ def get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules):
         data = response.json()
         total = data.get("data", {}).get("stixCoreRelationships", {}).get("pageInfo", {}).get("globalCount", 0)
         if total == 0:
-            log_debug(f"No techniques found for Sigma rule: {sigma_name}")
+            log_info(f"No techniques found for Sigma rule: {sigma_name}")
             continue
         edges = data.get("data", {}).get("stixCoreRelationships", {}).get("edges", [])
         for edge in edges:
@@ -355,6 +355,7 @@ def create_coa_relationship(OPENCTI_URL, OPENCTI_HEADERS, coa_id, tid, technique
 def update_rules_in_opencti(OPENCTI_URL, OPENCTI_HEADERS, elastic_rules):
     for rule in elastic_rules:
         rule_name = f"[Rule] {rule.get('name', 'Unknown Rule')}"
+        log_info(f"Processing Elastic rule: {rule_name}")
         query = f"""
         mutation CreateCOA {{
             courseOfActionAdd (input: {{
