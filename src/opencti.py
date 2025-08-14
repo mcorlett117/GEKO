@@ -219,10 +219,9 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
         """
     response = requests.post(OPENCTI_URL, headers=OPENCTI_HEADERS, json={"query": query}, verify=False)
     if response.status_code != 200:
-        log_info(f"Failed to fetch COAs for technique {technique_id}")
+        log_error(f"Failed to fetch COAs for technique {technique_id}")
         return None
     data = response.json()
-    log_debug(f"Response for Sigma rules: {data}")
     if "data" not in data or "stixCoreRelationships" not in data["data"]:
         log_info(f"No coas found for actor {technique_id}.")
         return [], 0  # Return empty list and 0 instead of None
@@ -234,7 +233,6 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
         indicator_id = from_node.get("id")
         indicator_name = from_node.get("name")
         pattern_type = from_node.get("pattern_type")
-        log_debug(f"Processing indicator: {indicator_name} with pattern type: {pattern_type}")
         if pattern_type != "sigma":
             log_info(f"Skipping non-Sigma pattern type: {pattern_type}")
             continue
