@@ -190,7 +190,7 @@ This section provides an overview of the coverage of techniques by Elastic and S
 {coverage_table_uncovered}
 
 ### :rocket: {TABLE_LENGTH} techniques with Sigma Rules but no Elastic Rules
-| Technique | Sigma Rules | Elastic Rules | Sigma Rule suggestion |
+| Technique | Sigma Rules | Elastic Rules | 5 Sigma Rule suggestions |
 |-----------|-------------|---------------|----------------------|
 {sigma_table}
 

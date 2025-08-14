@@ -198,7 +198,7 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
         stixCoreRelationships(
             toId: "{technique_id}"
             relationship_type: "indicates"
-            fromTypes: ["Attack-Pattern"]
+            fromTypes: ["Indicator"]
         ) {{
         pageInfo {{
             globalCount
@@ -222,17 +222,19 @@ def get_sigma_rules_for_technique(OPENCTI_URL, OPENCTI_HEADERS, technique_id):
         log_info(f"Failed to fetch COAs for technique {technique_id}")
         return None
     data = response.json()
+    log_debug(f"Response for Sigma rules: {data}")
     if "data" not in data or "stixCoreRelationships" not in data["data"]:
         log_info(f"No coas found for actor {technique_id}.")
         return [], 0  # Return empty list and 0 instead of None
-    node_from = data["data"]["stixCoreRelationships"].get("edges", [])
+    edges = data["data"]["stixCoreRelationships"].get("edges", [])
     indicators = []
-    for edge in node_from:
-        node = edge.get("node", {})
+    for node in edges:
+        node = node.get("node", {})
         from_node = node.get("from", {})
         indicator_id = from_node.get("id")
         indicator_name = from_node.get("name")
         pattern_type = from_node.get("pattern_type")
+        log_debug(f"Processing indicator: {indicator_name} with pattern type: {pattern_type}")
         if pattern_type != "sigma":
             log_info(f"Skipping non-Sigma pattern type: {pattern_type}")
             continue
