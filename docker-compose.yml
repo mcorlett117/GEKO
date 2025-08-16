@@ -9,6 +9,7 @@ services:
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - xpack.security.enabled=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.http.ssl.enabled=false
     ulimits:
       memlock:
         soft: -1
@@ -27,7 +28,7 @@ services:
     environment:
       # Connects to the 'elasticsearch-siem' service inside Docker
       - ELASTICSEARCH_HOSTS=["http://es-siem:9200"]
-       - ELASTICSEARCH_SERVICEACCOUNTTOKEN=${ELASTICSEARCH_SERVICEACCOUNTTOKEN} #<run the following in elastic to get key> # sudo docker exec -it es ./bin/elasticsearch-service-tokens create elastic/kibana kibana (Run this in ES to generate a token)
+      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=${ELASTICSEARCH_SERVICEACCOUNTTOKEN} #<run the following in elastic to get key> # sudo docker exec -it es-siem ./bin/elasticsearch-service-tokens create elastic/kibana kibana (Run this in ES to generate a token)
       - xpack.encryptedSavedObjects.encryptionKey=abcdeabcdeabcdeabcdeabcdeabcdeab
     ports:
       - "5601:5601"
@@ -138,7 +139,7 @@ services:
       - "8080:8080"
     depends_on:
       - redis
-      - elasticsearch-opencti # <-- Depends on the correct ES instance
+      - es-opencti # <-- Depends on the correct ES instance
       - minio
       - rabbitmq
     restart: always
@@ -223,30 +224,11 @@ services:
       - CONNECTOR_LOG_LEVEL=error
       - MITRE_REMOVE_STATEMENT_MARKING=false
       - MITRE_INTERVAL=1 # In days
-      - CONNECTOR_SEND_TO_QUEUE=true
-      - CONNECTOR_SEND_TO_DIRECTORY=true
-      - CONNECTOR_SEND_TO_DIRECTORY_PATH=${TARGET_DIR}
-      - CONNECTOR_SEND_TO_DIRECTORY_RETENTION=7
     restart: always
     depends_on:
       - opencti
 
-  # --- GEKO Python App ---
-  geko-app:
-    build: .
-    container_name: geko-app
-    depends_on:
-      - opencti
-      - elasticsearch-siem # <-- Depends on the correct ES instance
-    env_file:
-      - .env
-    volumes:
-      - ./reports:/app/reports
-    restart: on-failure
-    networks:
-      - geko-net
-
-  # --- GitLab ---
+# --- GitLab ---
   gitlab:
     image: gitlab/gitlab-ce:latest
     container_name: gitlab
@@ -270,7 +252,7 @@ services:
 volumes:
   esdata-siem:
   esdata-opencti:
-  redis-data:
+  redisdata:
   s3data:
   rabbitmq-data:
   gitlab-config:
