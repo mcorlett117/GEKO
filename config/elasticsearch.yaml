@@ -1,0 +1,2 @@
+xpack.encryptedSavedObjects.encryptionKey: "abcdeabcdeabcdeabcdeabcdeabcdeab"
+xpack.encryptedSavedObjects.enabled: true

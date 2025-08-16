@@ -134,7 +134,14 @@ def create_metric_table(elastic_techniques, sigma_techniques, unique_techniques)
 
     uncovered = total_techniques - len(set( tid for tid in unique_tids if any(et['tid'] == tid or et.get('stid') == tid for et in elastic_techniques) or any(st['tid'] == tid for st in sigma_techniques)))
 
-    metric_table = f"""| Total Techniques | {total_techniques} | 100% |
+    if total_techniques == 0:
+        metric_table = f"""| Total Techniques | 0 | 0% |
+| Covered by Elastic | 0 | 0.00% |
+| Covered by Sigma | 0 | 0.00% |
+| Uncovered | 0 | 0.00% |
+"""
+    else:
+        metric_table = f"""| Total Techniques | {total_techniques} | 100% |
 | Covered by Elastic | {covered_by_elastic} | {covered_by_elastic / total_techniques * 100:.2f}% |
 | Covered by Sigma | {covered_by_sigma} | {covered_by_sigma / total_techniques * 100:.2f}% |
 | Uncovered | {uncovered} | {uncovered / total_techniques * 100:.2f}% |
