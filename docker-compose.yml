@@ -29,7 +29,8 @@ services:
       # Connects to the 'elasticsearch-siem' service inside Docker
       - ELASTICSEARCH_HOSTS=["http://es-siem:9200"]
       - ELASTICSEARCH_SERVICEACCOUNTTOKEN=${ELASTICSEARCH_SERVICEACCOUNTTOKEN} #<run the following in elastic to get key> # sudo docker exec -it es-siem ./bin/elasticsearch-service-tokens create elastic/kibana kibana (Run this in ES to generate a token)
-      - xpack.encryptedSavedObjects.encryptionKey=abcdeabcdeabcdeabcdeabcdeabcdeab
+    volumes:
+      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:
       - "5601:5601"
     depends_on:
