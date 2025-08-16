@@ -96,8 +96,6 @@ services:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
       - RABBITMQ_NODENAME=rabbit01@localhost
-      - RABBITMQ_CONSUMER_TIMEOUT=36000000
-      - RABBITMQ_MAX_MESSAGE_SIZE=30000000
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     restart: always
@@ -106,7 +104,7 @@ services:
 
   # --- OpenCTI Platform ---
   opencti:
-    image: opencti/platform:5.12.9
+    image: opencti/platform:${CONNECTOR_VERSION}
     environment:
       - JWT_EXPIRATION=28800
       - NODE_OPTIONS=--max-old-space-size=8096
@@ -158,6 +156,8 @@ services:
       mode: replicated
       replicas: 3
     restart: always
+    networks:
+      - geko-net
     logging:
       options:
         max-size: 10m
@@ -173,6 +173,8 @@ services:
       - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=error
     restart: always
+    networks:
+      - geko-net
     logging:
       options:
         max-size: 10m
@@ -193,6 +195,8 @@ services:
     restart: always
     depends_on:
       - opencti
+    networks:
+      - geko-net
 
   connector-analysis:
     image: opencti/connector-import-document:${CONNECTOR_VERSION}
@@ -209,6 +213,8 @@ services:
       - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=info
     restart: always
+    networks:
+      - geko-net
 
   connector-mitre:
     image: opencti/connector-mitre:${CONNECTOR_VERSION}
@@ -227,6 +233,8 @@ services:
     restart: always
     depends_on:
       - opencti
+    networks:
+      - geko-net
 
 # --- GitLab ---
   gitlab:
