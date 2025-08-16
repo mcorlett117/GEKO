@@ -1,92 +1,102 @@
 services:
   # --- Elasticsearch instance for SIEM (Kibana, GEKO App) ---
-  elasticsearch-siem:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.1 # Version aligned with Kibana
-    container_name: elasticsearch-siem
+  es-siem:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.3
+    container_name: es-siem
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-Changeme} # Use .env file, with a default
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - esdata-siem:/usr/share/elasticsearch/data # <-- Uses a unique volume
+      - esdata-siem:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200" # Exposed to host for GEKO app and management
+      - "9200:9200"
     networks:
       - geko-net
 
   # --- Kibana for SIEM ---
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.14.1 # Version aligned with Elasticsearch
+    image: docker.elastic.co/kibana/kibana:8.18.3 
     container_name: kibana
     environment:
       # Connects to the 'elasticsearch-siem' service inside Docker
-      - ELASTICSEARCH_HOSTS=["http://elasticsearch-siem:9200"]
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD:-Changeme} # Set this in your .env file
+      - ELASTICSEARCH_HOSTS=["http://es-siem:9200"]
+       - ELASTICSEARCH_SERVICEACCOUNTTOKEN=${ELASTICSEARCH_SERVICEACCOUNTTOKEN} #<run the following in elastic to get key> # sudo docker exec -it es ./bin/elasticsearch-service-tokens create elastic/kibana kibana (Run this in ES to generate a token)
+      - xpack.encryptedSavedObjects.encryptionKey=abcdeabcdeabcdeabcdeabcdeabcdeab
     ports:
       - "5601:5601"
     depends_on:
-      - elasticsearch-siem
+      - es-siem
     networks:
       - geko-net
     restart: always
 
   # --- Redis for OpenCTI ---
   redis:
-    image: redis:7.2-alpine # Using a valid, stable image tag
+    image: redis:8.0.3
     restart: always
     volumes:
-      - redis-data:/data
+      - redisdata:/data
     networks:
       - geko-net
 
   # --- Elasticsearch instance for OpenCTI ---
-  elasticsearch-opencti:
+  es-opencti:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.1
-    container_name: elasticsearch-opencti
+    container_name: es-opencti
     volumes:
-      - esdata-opencti:/usr/share/elasticsearch/data # <-- Uses a unique volume
+      - esdata-opencti:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
       - xpack.ml.enabled=false
-      - xpack.security.enabled=false # Security is disabled for OpenCTI's internal ES
-      - "ES_JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}" # Adjusted memory
+      - xpack.security.enabled=false
+      - thread_pool.search.queue_size=5000
+      - logger.org.elasticsearch.discovery="ERROR"
+      - "ES_JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}"
     restart: always
     ulimits:
       memlock:
         soft: -1
         hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    logging:
+      options:
+        max-size: 10m
     networks:
       - geko-net
 
   # --- MinIO for OpenCTI ---
   minio:
-    image: minio/minio:RELEASE.2024-08-07T23-53-33Z # Using a valid, recent image tag
+    image: minio/minio:RELEASE.2025-06-13T11-33-47Z
     volumes:
       - s3data:/data
     ports:
-      - "9001:9000" # Changed host port to avoid conflict with ES
-      - "9002:9001"
+      - "9000:9000"
     environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-    command: server /data --console-address ":9001"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data
     restart: always
     networks:
       - geko-net
 
   # --- RabbitMQ for OpenCTI ---
   rabbitmq:
-    image: rabbitmq:3.13-management # Using a valid, stable image tag
+    image: rabbitmq:4.1-management
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_NODENAME=rabbit01@localhost
+      - RABBITMQ_CONSUMER_TIMEOUT=36000000
+      - RABBITMQ_MAX_MESSAGE_SIZE=30000000
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     restart: always
@@ -97,19 +107,33 @@ services:
   opencti:
     image: opencti/platform:5.12.9
     environment:
+      - JWT_EXPIRATION=28800
+      - NODE_OPTIONS=--max-old-space-size=8096
       - APP__PORT=8080
-      - APP__BASE_URL=${OPENCTI_BASE_URL}
-      - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - APP__BASE_URL=http://localhost:8080
       - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
       - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
+      - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - APP__APP_LOGS__LOGS_LEVEL=error
+      - APP__GRAPHQL__PLAYGROUND__ENABLED=true
+      - APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION=false
       - REDIS__HOSTNAME=redis
-      # Connects to the 'elasticsearch-opencti' service inside Docker
-      - ELASTICSEARCH__URL=http://elasticsearch-opencti:9200
+      - REDIS__PORT=6379
+      - ELASTICSEARCH__URL=http://es-opencti:9200
       - MINIO__ENDPOINT=minio
       - MINIO__PORT=9000
+      - MINIO__USE_SSL=false
+      - MINIO__ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO__SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - RABBITMQ__HOSTNAME=rabbitmq
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__PORT_MANAGEMENT=15672
+      - RABBITMQ__MANAGEMENT_SSL=false
       - RABBITMQ__USERNAME=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ__PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - SMTP__HOSTNAME=${SMTP_HOSTNAME}
+      - SMTP__PORT=25
+      - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
     ports:
       - "8080:8080"
     depends_on:
@@ -120,6 +144,92 @@ services:
     restart: always
     networks:
       - geko-net
+
+  worker:
+    image: opencti/worker:${CONNECTOR_VERSION}
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - WORKER_LOG_LEVEL=info
+    depends_on:
+      - opencti
+    deploy:
+      mode: replicated
+      replicas: 3
+    restart: always
+    logging:
+      options:
+        max-size: 10m
+
+  connector-export-stix:
+    image: opencti/connector-export-file-stix:${CONNECTOR_VERSION}
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=4c20cc0f-bbc5-4417-9312-8b075edd90e8
+      - CONNECTOR_NAME=Export Stix
+      - CONNECTOR_SCOPE=application/vnd.oasis.stix+json
+      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=error
+    restart: always
+    logging:
+      options:
+        max-size: 10m
+
+  connector-import-stix:
+    image: opencti/connector-import-file-stix:${CONNECTOR_VERSION}
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_IMPORT_FILE_STIX_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
+      - CONNECTOR_NAME=Import Stix
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_SCOPE=application/json,text/xml
+      - CONNECTOR_AUTO=true # Enable/disable auto-import of file
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=error
+    restart: always
+    depends_on:
+      - opencti
+
+  connector-analysis:
+    image: opencti/connector-import-document:${CONNECTOR_VERSION}
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_ANALYSIS_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=INTERNAL_ANALYSIS
+      - CONNECTOR_NAME=Import Document Analysis
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_SCOPE=application/pdf,text/plain,text/html
+      - CONNECTOR_AUTO=true # Enable/disable auto-import of file
+      - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=info
+    restart: always
+
+  connector-mitre:
+    image: opencti/connector-mitre:${CONNECTOR_VERSION}
+    privileged: true
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${MITRE_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_MITRE_ID}
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=MITRE
+      - CONNECTOR_SCOPE=tool,report,malware,identity,campaign,intrusion-set,attack-pattern,course-of-action,x-mitre-data-source,x-mitre-data-component,x-mitre-matrix,x-mitre-tactic,x-mitre-collection,relationshipmarking-definition
+      - CONNECTOR_RUN_AND_TERMINATE=false
+      - CONNECTOR_LOG_LEVEL=error
+      - MITRE_REMOVE_STATEMENT_MARKING=false
+      - MITRE_INTERVAL=1 # In days
+      - CONNECTOR_SEND_TO_QUEUE=true
+      - CONNECTOR_SEND_TO_DIRECTORY=true
+      - CONNECTOR_SEND_TO_DIRECTORY_PATH=${TARGET_DIR}
+      - CONNECTOR_SEND_TO_DIRECTORY_RETENTION=7
+    restart: always
+    depends_on:
+      - opencti
 
   # --- GEKO Python App ---
   geko-app:
