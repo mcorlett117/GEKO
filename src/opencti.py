@@ -262,6 +262,10 @@ def get_sigma_techniques(OPENCTI_URL, OPENCTI_HEADERS, sigma_rules):
                                 id
                                 name
                                 x_mitre_id
+                                killChainPhases {{
+                                    phase_name
+                                    id
+                                }}
                             }}
                         }}
                     }}
