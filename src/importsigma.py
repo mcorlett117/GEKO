@@ -20,7 +20,7 @@ OPENCTI_HEADERS = {
     "Content-Type": "application/json"
 }
 
-sigma_folder = "../sigma/rules/"
+sigma_folder = "./sigma/rules/windows"
 
 def get_sigma_rules(sigma_folder):
     log_debug(f"Starting Sigma rule import from folder: {sigma_folder}")
@@ -28,7 +28,8 @@ def get_sigma_rules(sigma_folder):
         for filename in files:
             log_debug(f"Processing file: {filename}")
             if filename.endswith(".yml"):
-                with open(os.path.join(root, filename), "r", encoding="utf-8") as f:
+                file_path = os.path.normpath(os.path.join(root, filename))
+                with open(file_path, "r", encoding="utf-8") as f:
                     rule = yaml.safe_load(f)
                     if not rule:
                         log_error(f"Failed to parse Sigma rule: {filename}")
