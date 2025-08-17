@@ -20,7 +20,7 @@ OPENCTI_HEADERS = {
     "Content-Type": "application/json"
 }
 
-sigma_folder = "./sigma/rules/windows"
+sigma_folder = "./sigma/rules/"
 
 def get_sigma_rules(sigma_folder):
     log_debug(f"Starting Sigma rule import from folder: {sigma_folder}")
