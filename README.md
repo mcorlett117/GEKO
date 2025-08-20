@@ -57,7 +57,7 @@ If you already have your own instances of Elasticsearch and OpenCTI, you can get
 
 ### Option 2: You do not have Elastic or OpenCTI
 
-If you don't have an existing Elastic or OpenCTI stack, you can use the provided `docker-compose.yml` to set one up.
+If you dont have an existing Elastic or OpenCTI stack, you can use the provided `docker-compose.yml` to set one up.
 
 1.  **Clone the repository:**
     ```bash
