@@ -1,91 +1,95 @@
-# GEKO: Threat-Informed Detection Engine :lizard:
+# GEKO: Threat-Informed Detection Lifecycle Engine
 
-![Project Status](https://img.shields.io/badge/Status-In_development-red) ![Python Version](https://img.shields.io/badge/python-3\.10+-blue)
+GEKO is an automated engine that creates a threat-informed detection lifecycle. It provides a data-driven view of your detection coverage and prioritizes detection engineering efforts based on relevant threats. GEKO bridges the gap between threat intelligence and security operations by querying your OpenCTI instance for high-priority threat actors and their associated Tactics, Techniques, and Procedures (TTPs). It then maps this threat landscape against your active detection rules in Elastic to generate a comprehensive report. This report helps security professionals understand their current coverage, identify critical gaps, and focus their rule-writing efforts where they matter most.
 
-An automated engine for creating a threat-informed detection lifecycle by integrating **G**itLab, **E**lasticsearch, **K**ibana, and **O**penCTI.
+---
 
-## About The Project
+## ⚙️ How it Works
 
-GEKO is designed to provide a clear, data-driven view of your detection coverage and prioritize detection engineering efforts based on relevant threats. It achieves this by bridging the gap between threat intelligence and security operations. The engine queries your OpenCTI instance for high-priority threat actors and their associated Tactics, Techniques, and Procedures (TTPs), then maps this threat landscape against your active detection rules in Elastic.
+GEKO automates the following tasks:
 
-The core goal is to generate a comprehensive report that helps security professionals understand their current coverage, identify critical gaps, and focus their rule-writing efforts where they matter most.
+1.  **Queries OpenCTI:** Fetches your top threat actors and their associated TTPs.
+2.  **Queries Elasticsearch:** Retrieves all enabled detection rules.
+3.  **Correlates Data:** Maps the TTPs from OpenCTI to the detection rules in Elasticsearch.
+4.  **Generates Report:** Creates a markdown report that visualizes the detection coverage for each threat actor and their TTPs.
 
-## Getting Started: Local Setup
+---
 
-Follow these steps to get a local instance of the full GEKO stack running for development and testing.
+## 🚀 Getting Started
 
-#### Prerequisites
-* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-* [Docker](https://docs.docker.com/get-started/)
-* [Docker Compose](https://docs.docker.com/compose/install/)
+There are two primary use cases for GEKO, depending on whether you have an existing Elastic and OpenCTI stack.
 
-### Installation Guide
+### Option 1: You have your own Elastic and OpenCTI
 
-1.  **Clone the Repository:**
+If you already have your own instances of Elasticsearch and OpenCTI, you can get started quickly:
+
+1.  **Clone the repository:**
     ```bash
     git clone [https://github.com/047741/GEKO.git](https://github.com/047741/GEKO.git)
     cd GEKO
     ```
+2.  **Copy the `src` folder** to your desired location.
 
-2.  **Create Your Environment File:**
-    Create a file named `.env` in the project root and populate it with your configuration values. Refer to the `env.example` file for a template. Leave the `KIBANA_SERVICE_TOKEN` blank for now.
-
-3.  **Start the GEKO Stack:**
-    Due to the security model in modern Elastic Stack, you must follow a specific multi-step process the first time you start the services.
-
-    * **Step 1:** Start Elasticsearch Only and wait for it to initialize (about 60 seconds).
-        ```bash
-        docker-compose up -d elasticsearch-siem
-        ```
-
-    * **Step 2:** Generate the Kibana Service Token.
-        ```bash
-        docker exec -it elasticsearch-siem bin/elasticsearch-service-tokens create elastic/kibana kibana-token
-        ```
-        Copy the long token value from the JSON block returned in the terminal.
-
-    * **Step 3:** Update your `.env` file with the copied token.
-        ```
-        # In your .env file
-        KIBANA_SERVICE_TOKEN="[your-long-token-here]"
-        ```
-
-    * **Step 4:** Start the remaining services.
-        ```bash
-        docker-compose up -d
-        ```
-
-### Usage Instructions
-
-Once the full stack is running, you can execute the analysis script from a Python virtual environment.
-
-1.  **Set up the Python Environment:**
+3.  **Install dependencies:**
     ```bash
-    python -m venv venv
-    .\venv\Scripts\activate
-    pip install -r requirements.txt
+    pip install -r src/requirements.txt
     ```
+4.  **Configure your environment:**
+    * Create a `.env` file inside the `src` directory.
+    * Update the `.env` file with your OpenCTI URL, credentials, Elastic URL, credentials, and a comma-separated list of your top threat actors.
 
-2.  **Run the GEKO Script:**
+5.  **Run GEKO:**
     ```bash
     python src/main.py
     ```
+    This will generate a threat report like `Example-Report.md` in the `src` directory.
 
-### Accessing the Services
-* **OpenCTI UI:** `http://localhost:8080`
-* **Kibana UI:** `http://localhost:5601`
+### Option 2: You do not have Elastic or OpenCTI
 
-## Roadmap
+If you don't have an existing Elastic or OpenCTI stack, you can use the provided `docker-compose.yml` to set one up.
 
-* [x] **Phase 1: Foundational Reporting**
-    * Generate a strategic threat and detection coverage report.
-* [ ] **Phase 2: Centralized Visualization**
-    * Develop a centralized dashboard for interactive data exploration.
-* [ ] **Phase 3: Automated Rule Prioritization**
-    * Enable prioritizing detection efforts based on factors like country or target industry.
-* [ ] **Phase 4: Full Detection-as-Code**
-    * Automate the creation of detection rules from threat intelligence.
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/047741/GEKO.git](https://github.com/047741/GEKO.git)
+    cd GEKO
+    ```
+2.  **Start Elasticsearch:**
+    ```bash
+    docker-compose up -d es-siem
+    ```
+3.  **Generate a Kibana service token:** Once Elasticsearch is running, execute the following command:
+    ```bash
+    docker exec -it es-siem bin/elasticsearch-service-tokens create elastic/kibana kibana-token
+    ```
+4.  **Configure your environment:**
+    * Create a `.env` file in the project root by copying `env.example`.
+    * Paste the generated token into the `ELASTICSEARCH_SERVICEACCOUNT_TOKEN` variable in your `.env` file.
+    * Update the `.env` file with your chosen Kibana password and OpenCTI variables (connector IDs, admin credentials, etc.).
 
-## License
+5.  **Start the remaining services:**
+    ```bash
+    docker-compose up -d kibana es-opencti redis minio rabbitmq opencti-platform worker
+    ```
+    You can also start any additional OpenCTI connectors as required by uncommenting them in the `docker-compose.yml` file.
 
-Distributed under the MIT License. See `LICENSE` for more information.
+6.  **Run GEKO:**
+    * Once you have populated OpenCTI with threat intelligence and enabled detection rules in Kibana, you can run the `main.py` script to generate your threat report.
+    * Follow the steps in **Option 1** to run the script.
+
+---
+
+## 📄 Example Report
+
+An example of the generated threat report can be found in [`Example-Report.md`](Example-Report.md). This report will give you an idea of the insights you can gain from GEKO.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
