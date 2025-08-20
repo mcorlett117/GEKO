@@ -36,7 +36,7 @@ If you already have your own instances of Elasticsearch and OpenCTI, you can get
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/047741/GEKO.git](https://github.com/047741/GEKO.git)
+    git clone https://github.com/047741/GEKO.git
     cd GEKO
     ```
 2.  **Copy the `src` folder** to your desired location.
