@@ -14,7 +14,18 @@ GEKO automates the following tasks:
 4.  **Generates Report:** Creates a markdown report that visualizes the detection coverage for each threat actor and their TTPs.
 
 ---
+## ✨ Bonus Feature: Sigma Rule Importer
 
+Included in the `src` directory is `importsigma.py`, a powerful utility script to quickly populate your OpenCTI instance.
+
+* **What it does:** The script imports detection logic from **Sigma rules** directly into OpenCTI as detection rules.
+* **Automatic Mapping:** It automatically reads the tags in each Sigma rule and maps it to the corresponding MITRE ATT&CK TTPs within OpenCTI. This saves you the manual effort of associating detection logic with threat behaviors.
+
+To use it, simply clone SigmaHQ rules and update script with folder location or point to your own sigma repo.
+```bash
+python src/importsigma.py
+
+---
 ## 🚀 Getting Started
 
 There are two primary use cases for GEKO, depending on whether you have an existing Elastic and OpenCTI stack.
