@@ -259,6 +259,16 @@ services:
       - geko-net
     restart: always
 
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    volumes:
+      - './runner_config:/etc/gitlab-runner'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - geko-net
+    restart: always
+
 # Define unique volumes at the bottom
 volumes:
   esdata-siem:
