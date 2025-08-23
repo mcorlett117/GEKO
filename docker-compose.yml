@@ -242,13 +242,14 @@ services:
   gitlab:
     image: gitlab/gitlab-ce:latest
     container_name: gitlab
-    hostname: gitlab.geko.local # Using a more specific hostname
+    hostname: gitlab.local # Using a more specific hostname
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://gitlab.geko.local:8929'
+        external_url 'http://gitlab.local:8929'
         gitlab_rails['gitlab_shell_ssh_port'] = 2224
     ports:
-      - "8929:80"     # <-- Changed host port to avoid conflict
+      - "8929:8929"     # <-- Changed host port to avoid conflict
+      - "4443:443"
       - "2224:22"
     volumes:
       - gitlab-config:/etc/gitlab
