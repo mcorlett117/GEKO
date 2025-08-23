@@ -24,7 +24,7 @@ Included in the `src` directory is `importsigma.py`, a powerful utility script t
 To use it, simply clone SigmaHQ rules and update script with folder location or point to your own sigma repo.
 ```bash
 python src/importsigma.py
-
+```
 ---
 ## 🚀 Getting Started
 
