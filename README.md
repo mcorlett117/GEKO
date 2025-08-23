@@ -26,6 +26,7 @@ To use it, simply clone SigmaHQ rules and update script with folder location or 
 python src/importsigma.py
 ```
 ---
+
 ## 🚀 Getting Started
 
 There are two primary use cases for GEKO, depending on whether you have an existing Elastic and OpenCTI stack.
