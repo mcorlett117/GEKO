@@ -16,3 +16,7 @@ docker-compose.yml
 # README and local config
 README.md
 .env
+
+#gitlab config
+gitlab.rb
+runner_config/
