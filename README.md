@@ -54,7 +54,7 @@ If you already have your own instances of Elasticsearch and OpenCTI, you can get
     ```bash
     python src/main.py
     ```
-    This will generate a threat report like `Example-Report.md` in the `src` directory.
+    This will generate a threat report like [`Example-Report.md`](Example-Report.md) in the `src` directory.
 
 ### Option 2: You do not have Elastic or OpenCTI
 
@@ -74,7 +74,7 @@ If you dont have an existing Elastic or OpenCTI stack, you can use the provided 
     docker exec -it es-siem bin/elasticsearch-service-tokens create elastic/kibana kibana-token
     ```
 4.  **Configure your environment:**
-    * Create a `.env` file in the project root by copying `env.example`.
+    * Create a `.env` file in the project root by copying `env.docker`.
     * Paste the generated token into the `ELASTICSEARCH_SERVICEACCOUNT_TOKEN` variable in your `.env` file.
     * Update the `.env` file with your chosen Kibana password and OpenCTI variables (connector IDs, admin credentials, etc.).
 
