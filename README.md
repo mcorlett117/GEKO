@@ -95,7 +95,12 @@ If you dont have an existing Elastic or OpenCTI stack, you can use the provided 
 An example of the generated threat report can be found in [`Example-Report.md`](Example-Report.md). This report will give you an idea of the insights you can gain from GEKO.
 
 ---
+## 🔮 Future aspirations
+Generate a report based on a country  
+Generate a report based on industry
 
+
+---
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue.
