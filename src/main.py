@@ -38,11 +38,13 @@ TABLE_LENGTH = 10 # Number of rows to show in the table
 # Data processing
 # ==============
 
-def ensure_threat_reports_folder():
-    folder_path = os.path.join("Threat-Report")
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
 
+# Create threat-reports/<YYYY-MM> relative to this script
+def ensure_threat_report_folder():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    report_dir = os.path.join(base_dir, '..', 'Threat-Report', datetime.now().strftime("%Y-%m"))
+    os.makedirs(report_dir, exist_ok=True)
+    return os.path.abspath(report_dir)
 
 def get_unique_actor_techniques(all_actors):
     unique_techniques = []
@@ -90,7 +92,7 @@ def extract_elastic_techniques(elastic_rules):
 # ==============
 
 def main():
-    ensure_threat_reports_folder()
+    report_dir = ensure_threat_report_folder()
     elastic_rules, enabled_rules = get_elastic_rules(ELASTIC_API_URL, ELASTIC_HEADERS)
     log_info(f"Found {len(elastic_rules)} Elastic rules, {len(enabled_rules)} enabled rules.")
     log_info("Updating Elastic rules in OpenCTI.")
@@ -203,9 +205,10 @@ This section provides an overview of the coverage of techniques by Elastic and S
     #print(report_data)
     log_info("Saving report to file.")
     report_title = datetime.now().strftime("%Y-%m-%d-Threat-Report.md")
-    with open(f"./Threat-Report/{report_title}", "w") as f:
+    report_path = os.path.join(report_dir, report_title)
+    with open(report_path, "w") as f:
         f.write(report_data)
-        log_info(f"Report saved to ./Threat-Report/{report_title}") 
+        log_info(f"Report saved to {report_path}")
 
 if __name__ == "__main__":
     main()
