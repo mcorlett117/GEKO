@@ -99,7 +99,6 @@ An example of the generated threat report can be found in [`Example-Report.md`](
 Generate a report based on a country  
 Generate a report based on industry
 
-
 ---
 ## 🤝 Contributing
 
