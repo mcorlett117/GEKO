@@ -43,6 +43,12 @@ def ensure_threat_reports_folder():
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
+def ensure_threat_report_subfolder():
+    # create subfolder year-month
+    subfolder = datetime.now().strftime("%Y-%m")
+    folder_path = os.path.join("Threat-Report", subfolder)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
 
 def get_unique_actor_techniques(all_actors):
     unique_techniques = []
@@ -91,6 +97,8 @@ def extract_elastic_techniques(elastic_rules):
 
 def main():
     ensure_threat_reports_folder()
+    subfolder = datetime.now().strftime("%Y-%m")
+    ensure_threat_report_subfolder()
     elastic_rules, enabled_rules = get_elastic_rules(ELASTIC_API_URL, ELASTIC_HEADERS)
     log_info(f"Found {len(elastic_rules)} Elastic rules, {len(enabled_rules)} enabled rules.")
     log_info("Updating Elastic rules in OpenCTI.")
@@ -203,9 +211,9 @@ This section provides an overview of the coverage of techniques by Elastic and S
     #print(report_data)
     log_info("Saving report to file.")
     report_title = datetime.now().strftime("%Y-%m-%d-Threat-Report.md")
-    with open(f"./Threat-Report/{report_title}", "w") as f:
+    with open(f"./Threat-Report/{subfolder}/{report_title}", "w") as f:
         f.write(report_data)
-        log_info(f"Report saved to ./Threat-Report/{report_title}") 
+        log_info(f"Report saved to ./Threat-Report/{subfolder}/{report_title}")
 
 if __name__ == "__main__":
     main()
