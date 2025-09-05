@@ -3,7 +3,6 @@
 GEKO is an automated engine that creates a threat-informed detection lifecycle. It provides a data-driven view of your detection coverage and prioritizes detection engineering efforts based on relevant threats. GEKO bridges the gap between threat intelligence and security operations by querying your OpenCTI instance for high-priority threat actors and their associated Tactics, Techniques, and Procedures (TTPs). It then maps this threat landscape against your active detection rules in Elastic to generate a comprehensive report. This report helps security professionals understand their current coverage, identify critical gaps, and focus their rule-writing efforts where they matter most.
 
 ---
-test
 ## ⚙️ How it Works
 
 GEKO automates the following tasks:
