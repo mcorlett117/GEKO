@@ -80,7 +80,7 @@ If you dont have an existing Elastic or OpenCTI stack, you can use the provided 
 
 5.  **Start the remaining services:**
     ```bash
-    docker-compose up -d kibana es-opencti redis minio rabbitmq opencti-platform worker
+    docker-compose up -d kibana es-opencti redis minio rabbitmq opencti worker
     ```
     You can also start any additional OpenCTI connectors as required by uncommenting them in the `docker-compose.yml` file.
 
