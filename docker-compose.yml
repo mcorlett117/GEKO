@@ -149,7 +149,7 @@ services:
   worker:
     image: opencti/worker:${CONNECTOR_VERSION}
     environment:
-      - OPENCTI_URL=http://localhost:8080
+      - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - WORKER_LOG_LEVEL=info
     depends_on:
@@ -180,6 +180,21 @@ services:
     logging:
       options:
         max-size: 10m
+
+
+  connector-import-file-stix:
+    image: opencti/connector-import-file-stix:rolling
+    environment:
+      - OPENCTI_URL=http://localhost:8080
+      - OPENCTI_TOKEN=${MITRE_TOKEN}
+      - CONNECTOR_ID=f5e55328-398b-4213-9f5b-44112c981dd9
+      - CONNECTOR_NAME=ImportFileStix
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_SCOPE=application/json,application/xml
+      - CONNECTOR_AUTO=false # Enable/disable auto-import of file
+      - CONNECTOR_CONFIDENCE_LEVEL=15 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=error
+    restart: always
 
   connector-import-stix:
     image: opencti/connector-import-file-stix:${CONNECTOR_VERSION}
@@ -222,7 +237,7 @@ services:
     image: opencti/connector-mitre:${CONNECTOR_VERSION}
     privileged: true
     environment:
-      - OPENCTI_URL=http://localhost:8080
+      - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${MITRE_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MITRE_ID}
       - CONNECTOR_TYPE=EXTERNAL_IMPORT
