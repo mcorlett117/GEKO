@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 from elastic import get_elastic_rules
+from qradar import get_qradar_rules
 from opencti import get_actor_details, get_actor_techniques, get_sigma_rules, get_sigma_techniques, update_rules_in_opencti, remove_disabled_coas
 from tables import create_actor_table, create_technique_table, create_coverage_table, create_metric_table
 from log import log_info
@@ -14,6 +15,8 @@ OPENCTI_URL = os.getenv("OPENCTI_URL")
 OPENCTI_TOKEN = os.getenv("OPENCTI_TOKEN")
 ELASTIC_API_URL = os.getenv("ELASTIC_API_URL")
 ELASTIC_API_KEY = os.getenv("ELASTIC_API_KEY")
+qr_url = os.getenv("QRURL")
+qr_user = os.getenv("QRUSER")   
 
 
 
@@ -94,6 +97,7 @@ def extract_elastic_techniques(elastic_rules):
 def main():
     report_dir = ensure_threat_report_folder()
     elastic_rules, enabled_rules = get_elastic_rules(ELASTIC_API_URL, ELASTIC_HEADERS)
+   
     log_info(f"Found {len(elastic_rules)} Elastic rules, {len(enabled_rules)} enabled rules.")
     log_info("Updating Elastic rules in OpenCTI.")
     update_rules_in_opencti(OPENCTI_URL, OPENCTI_HEADERS, enabled_rules)
